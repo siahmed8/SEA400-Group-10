@@ -50,6 +50,11 @@ def sentence1() -> Expr:
     (not A) or (not B) or C
     """
     "*** BEGIN YOUR CODE HERE ***"
+    A, B, C = Expr('A'), Expr('B'), Expr('C')
+    clause1 = A | B
+    clause2 = ~A % (~B | C)
+    clause3 = disjoin([~A, ~B, C])
+    return conjoin([clause1, clause2, clause3])
     util.raiseNotDefined()
     "*** END YOUR CODE HERE ***"
 
@@ -63,6 +68,12 @@ def sentence2() -> Expr:
     (not D) implies C
     """
     "*** BEGIN YOUR CODE HERE ***"
+    A, B, C, D = Expr('A'), Expr('B'), Expr('C'), Expr('D')
+    clause1 = C % (B | D)
+    clause2 = A >> (~B & ~D)
+    clause3 = ~(B & ~C) >> A
+    clause4 = ~D >> C
+    return conjoin([clause1, clause2, clause3, clause4])
     util.raiseNotDefined()
     "*** END YOUR CODE HERE ***"
 
@@ -80,6 +91,15 @@ def sentence3() -> Expr:
     Pacman is born at time 0.
     """
     "*** BEGIN YOUR CODE HERE ***"
+    PacmanAlive_1  = PropSymbolExpr('PacmanAlive_1')
+    PacmanAlive_0  = PropSymbolExpr('PacmanAlive_0')
+    PacmanBorn_0   = PropSymbolExpr('PacmanBorn_0')
+    PacmanKilled_0 = PropSymbolExpr('PacmanKilled_0')
+
+    clause1 = PacmanAlive_1 % ((PacmanAlive_0 & ~PacmanKilled_0) | (~PacmanAlive_0 & PacmanBorn_0))
+    clause2 = ~(PacmanAlive_0 & PacmanBorn_0)
+    clause3 = PacmanBorn_0
+    return conjoin([clause1, clause2, clause3])
     util.raiseNotDefined()
     "*** END YOUR CODE HERE ***"
 
@@ -96,7 +116,9 @@ def findModelUnderstandingCheck() -> Dict[Expr, bool]:
     """
     a = Expr('A')
     "*** BEGIN YOUR CODE HERE ***"
-    print("a.__dict__ is:", a.__dict__) # might be helpful for getting ideas
+    a.op = 'a'
+    return {a: True}
+    print("a.__dict__ is:", a.__dict__)
     util.raiseNotDefined()
     "*** END YOUR CODE HERE ***"
 
@@ -104,6 +126,7 @@ def entails(premise: Expr, conclusion: Expr) -> bool:
     """Returns True if the premise entails the conclusion and False otherwise.
     """
     "*** BEGIN YOUR CODE HERE ***"
+    return findModel(premise & ~conclusion) == False
     util.raiseNotDefined()
     "*** END YOUR CODE HERE ***"
 
@@ -112,6 +135,7 @@ def plTrueInverse(assignments: Dict[Expr, bool], inverse_statement: Expr) -> boo
     pl_true may be useful here; see logic.py for its description.
     """
     "*** BEGIN YOUR CODE HERE ***"
+    return pl_true(~inverse_statement, assignments)
     util.raiseNotDefined()
     "*** END YOUR CODE HERE ***"
 
@@ -167,7 +191,6 @@ def exactlyOne(literals: List[Expr]) -> Expr:
     """
     "*** BEGIN YOUR CODE HERE ***"
     return conjoin([atLeastOne(literals), atMostOne(literals)])
-
     util.raiseNotDefined()
     "*** END YOUR CODE HERE ***"
 
@@ -201,7 +224,6 @@ def pacmanSuccessorAxiomSingle(x: int, y: int, time: int, walls_grid: List[List[
         return None
     
     "*** BEGIN YOUR CODE HERE ***"
-    return PropSymbolExpr(pacman_str, x, y, time=now) % disjoin(possible_causes)
     util.raiseNotDefined()
     "*** END YOUR CODE HERE ***"
 
@@ -273,20 +295,7 @@ def pacphysicsAxioms(t: int, all_coords: List[Tuple], non_outer_wall_coords: Lis
     pacphysics_sentences = []
 
     "*** BEGIN YOUR CODE HERE ***"
-    for (x, y) in all_coords:
-        pacphysics_sentences.append(PropSymbolExpr(wall_str, x, y) >> ~PropSymbolExpr(pacman_str, x, y, time=t))
-
-    pacphysics_sentences.append(exactlyOne([PropSymbolExpr(pacman_str, x, y, time=t) for (x, y) in non_outer_wall_coords]))
-
-    pacphysics_sentences.append(exactlyOne([PropSymbolExpr(action, time=t) for action in DIRECTIONS]))
-
-    if sensorModel:
-        pacphysics_sentences.append(sensorModel(t, non_outer_wall_coords))
-
-    if successorAxioms and t > 0:
-        result = successorAxioms(t, walls_grid, non_outer_wall_coords)
-        if result:
-            pacphysics_sentences.append(result)
+    util.raiseNotDefined()
     "*** END YOUR CODE HERE ***"
 
     return conjoin(pacphysics_sentences)
@@ -320,20 +329,6 @@ def checkLocationSatisfiability(x1_y1: Tuple[int, int], x0_y0: Tuple[int, int], 
     KB.append(conjoin(map_sent))
 
     "*** BEGIN YOUR CODE HERE ***"
-    # Add physics axioms for t=0 and t=1
-    KB.append(pacphysicsAxioms(0, all_coords, non_outer_wall_coords, walls_grid, sensorModel=None, successorAxioms=None))
-    KB.append(pacphysicsAxioms(1, all_coords, non_outer_wall_coords, walls_grid, sensorModel=None, successorAxioms=allLegalSuccessorAxioms))
-
-    # Known starting position and actions
-    KB.append(PropSymbolExpr(pacman_str, x0, y0, time=0))
-    KB.append(PropSymbolExpr(action0, time=0))
-    KB.append(PropSymbolExpr(action1, time=1))
-
-    # Check both models
-    model1 = findModel(conjoin(KB) & PropSymbolExpr(pacman_str, x1, y1, time=1))
-    model2 = findModel(conjoin(KB) & ~PropSymbolExpr(pacman_str, x1, y1, time=1))
-
-    return model1, model2
     util.raiseNotDefined()
     "*** END YOUR CODE HERE ***"
 
